@@ -21,6 +21,7 @@ Route::get('/', function () {
     return view('proceso')->with('quantum', Quantum::find(1))->with('procesos', Proceso::all());
 });
 
+// ALGORITMO FCFS
 Route::get('/fcfs', function () {
     $procesos = Proceso::orderBy('id')->get();
 
@@ -60,6 +61,7 @@ Route::get('/fcfs', function () {
     return view('fcfs')->with('procesos', $procesos)->with('promedioEspera', $promedioEspera)->with('promedioRetorno', $promedioRetorno);
 });
 
+// ALGORITMO SJF
 Route::get('/sjf', function () {
     $procesos = Proceso::orderBy('duracion', 'ASC')->get();
 
@@ -99,6 +101,7 @@ Route::get('/sjf', function () {
     return view('sjf')->with('procesos', $procesos)->with('promedioEspera', $promedioEspera)->with('promedioRetorno', $promedioRetorno);
 });
 
+// ALGORITMO Prioridad
 Route::get('/prioridad', function () {
     $procesos = Proceso::orderBy('prioridad', 'ASC')->get();
 
@@ -138,6 +141,7 @@ Route::get('/prioridad', function () {
     return view('prioridad')->with('procesos', $procesos)->with('promedioEspera', $promedioEspera)->with('promedioRetorno', $promedioRetorno);
 });
 
+// ALGORITMO ROUND ROBIN
 Route::get('/rr', function () {
     $procesos = Proceso::orderBy('id')->get();
     $quantum  = Quantum::orderBy('id')->first();
@@ -204,7 +208,9 @@ Route::get('/rr', function () {
     return view('rr')->with('procesos', $arregloFinal)->with('promedioEspera', $promedioEspera)->with('promedioRetorno', $promedioRetorno);
 });
 
+// Guardar los procesos
 Route::post('procesos/store', [ProcesoController::class, 'store'])->name('procesos.store');
+// Guardar el quantum
 Route::post('quantum/store', [QuantumController::class, 'store'])->name('quantum.store');
 
 Route::get('/dashboard', function () {
