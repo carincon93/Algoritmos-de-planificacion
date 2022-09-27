@@ -23,8 +23,10 @@ Route::get('/', function () {
 
 // ALGORITMO FCFS
 Route::get('/fcfs', function () {
+    // Obtiene todos los procesos en orden de llegada
     $procesos = Proceso::orderBy('id')->get();
 
+    // Variables inicialidas -> Para calcular el Tiempo de espra y retorno
     $tiempoEspera = collect([]);
     $tiempoRetorno = collect([]);
     $duracionTE = 0;
@@ -32,7 +34,7 @@ Route::get('/fcfs', function () {
 
     // Recorre cada proceso y extrae la duración de la BD
     foreach ($procesos as $key => $proceso) {
-        // Si es el primer proceso se añade un nuevo proceso con tiempo de duración = 0
+        // Si es el primer proceso se añade un nuevo proceso con tiempo de duración = 0 (Debido a que el primero proceso siempre empieza en 0)
         if ($key == 0) {
             $tiempoEspera->push([
                 'duracion' => $duracionTE,
@@ -44,18 +46,19 @@ Route::get('/fcfs', function () {
             'duracion' => $duracionTE += $proceso->duracion,
         ]);
 
+        // Si no es el primer proceso se añade la suma de la duración del proceso anterior con la actual
         $tiempoRetorno->push([
             'duracion' => $duracionTR += $proceso->duracion,
         ]);
     }
 
-    // Se calcula el promedio del TR
+    // Se calcula el promedio del TR (Total de duración dividido la cantidad de procesos)
     $promedioRetorno = $tiempoRetorno->sum('duracion') / count($tiempoRetorno);
 
-    // Como se añade un proceso con tiempo de duración 0 se debe eliminar el último proceso para que quede la misma cantidad de la BD
+    // Como en primer lugar se añade 'manualmente' un proceso con tiempo de duración 0 se debe eliminar el último proceso para que quede la misma cantidad de la BD
     $tiempoEspera = $tiempoEspera->slice(0, -1);
 
-    // Se calcula el promedio de TE
+    // Se calcula el promedio de TE (Total de duración dividido la cantidad de procesos)
     $promedioEspera = $tiempoEspera->sum('duracion') / count($tiempoEspera);
 
     return view('fcfs')->with('procesos', $procesos)->with('promedioEspera', $promedioEspera)->with('promedioRetorno', $promedioRetorno);
@@ -63,8 +66,10 @@ Route::get('/fcfs', function () {
 
 // ALGORITMO SJF
 Route::get('/sjf', function () {
+    // Obtiene todos los procesos en orden de duración - De menor a mayor
     $procesos = Proceso::orderBy('duracion', 'ASC')->get();
 
+    // Variables inicialidas -> Para calcular el Tiempo de espra y retorno
     $tiempoEspera = collect([]);
     $tiempoRetorno = collect([]);
     $duracionTE = 0;
@@ -72,7 +77,7 @@ Route::get('/sjf', function () {
 
     // Recorre cada proceso y extrae la duración de la BD
     foreach ($procesos as $key => $proceso) {
-        // Si es el primer proceso se añade un nuevo proceso con tiempo de duración = 0
+        // Si es el primer proceso se añade un nuevo proceso con tiempo de duración = 0 (Debido a que el primero proceso siempre empieza en 0)
         if ($key == 0) {
             $tiempoEspera->push([
                 'duracion' => $duracionTE,
@@ -89,13 +94,13 @@ Route::get('/sjf', function () {
         ]);
     }
 
-    // Se calcula el promedio del TR
+    // Se calcula el promedio del TR (Total de duración dividido la cantidad de procesos)
     $promedioRetorno = $tiempoRetorno->sum('duracion') / count($tiempoRetorno);
 
-    // Como se añade un proceso con tiempo de duración 0 se debe eliminar el último proceso para que quede la misma cantidad de la BD
+    // Como en primer lugar se añade 'manualmente' un proceso con tiempo de duración 0 se debe eliminar el último proceso para que quede la misma cantidad de la BD
     $tiempoEspera = $tiempoEspera->slice(0, -1);
 
-    // Se calcula el promedio de TE
+     // Se calcula el promedio de TE (Total de duración dividido la cantidad de procesos)
     $promedioEspera = $tiempoEspera->sum('duracion') / count($tiempoEspera);
 
     return view('sjf')->with('procesos', $procesos)->with('promedioEspera', $promedioEspera)->with('promedioRetorno', $promedioRetorno);
@@ -103,8 +108,10 @@ Route::get('/sjf', function () {
 
 // ALGORITMO Prioridad
 Route::get('/prioridad', function () {
+    // Obtiene todos los procesos en orden de prioridad - De mayor a menor
     $procesos = Proceso::orderBy('prioridad', 'ASC')->get();
 
+    // Variables inicialidas -> Para calcular el Tiempo de espra y retorno
     $tiempoEspera = collect([]);
     $tiempoRetorno = collect([]);
     $duracionTE = 0;
@@ -129,13 +136,13 @@ Route::get('/prioridad', function () {
         ]);
     }
 
-    // Se calcula el promedio del TR
+    // Se calcula el promedio del TR (Total de duración dividido la cantidad de procesos)
     $promedioRetorno = $tiempoRetorno->sum('duracion') / count($tiempoRetorno);
 
-    // Como se añade un proceso con tiempo de duración 0 se debe eliminar el último proceso para que quede la misma cantidad de procesos guardados en la BD
+    // Como en primer lugar se añade 'manualmente' un proceso con tiempo de duración 0 se debe eliminar el último proceso para que quede la misma cantidad de la BD
     $tiempoEspera = $tiempoEspera->slice(0, -1);
 
-    // Se calcula el promedio de TE
+    // Se calcula el promedio de TE (Total de duración dividido la cantidad de procesos)
     $promedioEspera = $tiempoEspera->sum('duracion') / count($tiempoEspera);
 
     return view('prioridad')->with('procesos', $procesos)->with('promedioEspera', $promedioEspera)->with('promedioRetorno', $promedioRetorno);
@@ -143,9 +150,12 @@ Route::get('/prioridad', function () {
 
 // ALGORITMO ROUND ROBIN
 Route::get('/rr', function () {
+    // Obtiene todos los procesos en orden de llegada
     $procesos = Proceso::orderBy('id')->get();
+    // Obitene el quantum
     $quantum  = Quantum::orderBy('id')->first();
 
+    // Variables inicialidas -> Para calcular el Tiempo de espra y retorno
     $procesosFaltantes = [];
     $arregloFinal = collect([]);
     $pos_fin = 0;
@@ -167,6 +177,7 @@ Route::get('/rr', function () {
             $pos_ini += $procesos[$key - 1]['duracion'] > $quantum->q ? $quantum->q : $procesos[$key - 1]['duracion'];
         }
 
+        // En el arreglo $procesosFaltantes se añaden los procesos con una nueva columna de procesos faltantes para calcular según el quantum cuantos procesos más se deben añadir
         array_push($procesosFaltantes, [
             'id'                => $proceso->id,
             'nombre'            => $proceso->nombre,
@@ -176,10 +187,11 @@ Route::get('/rr', function () {
         ]);
     }
 
-    $faltantes = count($procesosFaltantes);
+    // Cuenta cuantos procesos hay en BD
+    $totalProcesosfaltantes = count($procesosFaltantes);
     $restante = 0;
     // Recorre los procesos faltantes según el quantum de cada proceso y los añade al arregloFinal
-    while ($faltantes != 0) {
+    while ($totalProcesosfaltantes != 0) {
         foreach ($procesosFaltantes as $key => $procesoFaltante) {
             if ($procesoFaltante['procesos_restante'] >= 0) {
                 $arregloFinal->push([
@@ -190,10 +202,12 @@ Route::get('/rr', function () {
                 ]);
             }
 
+            // Cada que el algoritmo encuenta que no hay procesos faltantes de un proceso se resta de la variable del total de procesos faltantes
             if ($procesoFaltante['procesos_restante'] == 0) {
-                $faltantes -= 1;
+                $totalProcesosfaltantes -= 1;
             }
 
+            // Va restando el tiempo de duración del proceso recorrido según el quantum
             $procesosFaltantes[$key]['duracion'] -= $quantum->q;
             $procesosFaltantes[$key]['procesos_restante'] = $procesoFaltante['procesos_restante'] - 1;
         }
