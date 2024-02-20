@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('proceso')->with('quantum', Quantum::find(1))->with('procesos', Proceso::all());
+    return view('proceso')->with('quantum', Quantum::find(1))->with('procesos', Proceso::orderBy('id')->get());
 });
 
 // ALGORITMO FCFS
@@ -100,7 +100,7 @@ Route::get('/sjf', function () {
     // Como en primer lugar se añade 'manualmente' un proceso con tiempo de duración 0 se debe eliminar el último proceso para que quede la misma cantidad de la BD
     $tiempoEspera = $tiempoEspera->slice(0, -1);
 
-     // Se calcula el promedio de TE (Total de duración dividido la cantidad de procesos)
+    // Se calcula el promedio de TE (Total de duración dividido la cantidad de procesos)
     $promedioEspera = $tiempoEspera->sum('duracion') / count($tiempoEspera);
 
     return view('sjf')->with('procesos', $procesos)->with('promedioEspera', $promedioEspera)->with('promedioRetorno', $promedioRetorno);
